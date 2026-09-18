@@ -1,0 +1,7 @@
+{
+  "name": "Finora",
+  "description": "Track your past. See your future. Make better decisions. AI personal finance memory and decision assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
