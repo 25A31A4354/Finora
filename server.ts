@@ -24,15 +24,16 @@ function getGeminiClient(): GoogleGenAI | null {
   return new GoogleGenAI({ apiKey });
 }
 
-// Format INR helper for server-side prompts and deterministic calculations
+// Module-cached currency formatter avoiding C++ Intl re-instantiation per request
+const inrFormatter = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
+  maximumFractionDigits: 0,
+});
+
 function formatINR(amount: number): string {
   const isNegative = amount < 0;
-  const absAmount = Math.abs(Math.round(amount));
-  const formatted = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(absAmount);
+  const formatted = inrFormatter.format(Math.abs(Math.round(amount)));
   return isNegative ? `-${formatted}` : formatted;
 }
 
@@ -50,44 +51,38 @@ const VALID_CATEGORIES = [
   'Other',
 ];
 
+const CATEGORY_RULES: [string, RegExp][] = [
+  ['Food & Dining', /food|dine|dining|restaurant|cafe|coffee|tea|biscuit|snack|grocer|meal|swiggy|zomato|burger|pizza|bread|milk|lunch|dinner|breakfast/i],
+  ['Utilities & Bills', /utilit|bill|electric|power|water|gas|wifi|internet|broadband|recharge|mobile bill|phone bill|maintenance|maid|cook|clean/i],
+  ['Shopping & Gadgets', /phone|mobile|laptop|macbook|computer|ipad|tablet|headphone|airpod|gadget|electronic|cloth|shirt|pant|shoe|watch|shopping|amazon|flipkart|myntra|zara|apparel|dress/i],
+  ['Housing & Rent', /rent|lease|mortgage|flat|apartment|house|room|hostel|pg|deposit/i],
+  ['Transport & Fuel', /fuel|petrol|diesel|gasoline|uber|ola|auto|cab|taxi|metro|bus|train|railway|fare|toll|flight|parking/i],
+  ['Education', /college|school|fee|fees|tuition|course|book|exam|university|class|education|training|coaching/i],
+  ['Healthcare', /medic|doctor|hospital|clinic|pharmacy|pill|health|dental|dentist|lab|test|checkup/i],
+  ['Entertainment', /movie|cinema|film|theatre|netflix|prime|hotstar|spotify|concert|show|event|party|club|game|gaming|steam/i],
+  ['Travel', /trip|tour|vacation|flight|hotel|resort|airbnb|travel|sightseeing/i],
+  ['Personal Care', /salon|haircut|spa|massage|gym|fitness|yoga|grooming|cosmetic|makeup/i],
+];
+
 function normalizeCategory(categoryStr?: string, description?: string): string {
   if (categoryStr) {
     const trimmed = categoryStr.trim();
     const exact = VALID_CATEGORIES.find((c) => c.toLowerCase() === trimmed.toLowerCase());
     if (exact) return exact;
+
+    for (let i = 0; i < CATEGORY_RULES.length; i++) {
+      if (CATEGORY_RULES[i][1].test(trimmed)) {
+        return CATEGORY_RULES[i][0];
+      }
+    }
   }
 
-  const text = `${categoryStr || ''} ${description || ''}`.toLowerCase();
-
-  if (/food|dine|dining|restaurant|cafe|coffee|tea|biscuit|snack|grocer|meal|swiggy|zomato|burger|pizza|bread|milk|lunch|dinner|breakfast/i.test(text)) {
-    return 'Food & Dining';
-  }
-  if (/utilit|bill|electric|power|water|gas|wifi|internet|broadband|recharge|mobile bill|phone bill|maintenance|maid|cook|clean/i.test(text)) {
-    return 'Utilities & Bills';
-  }
-  if (/phone|mobile|laptop|macbook|computer|ipad|tablet|headphone|airpod|gadget|electronic|cloth|shirt|pant|shoe|watch|shopping|amazon|flipkart|myntra|zara|apparel|dress/i.test(text)) {
-    return 'Shopping & Gadgets';
-  }
-  if (/rent|lease|mortgage|flat|apartment|house|room|hostel|pg|deposit/i.test(text)) {
-    return 'Housing & Rent';
-  }
-  if (/fuel|petrol|diesel|gasoline|uber|ola|auto|cab|taxi|metro|bus|train|railway|fare|toll|flight|parking/i.test(text)) {
-    return 'Transport & Fuel';
-  }
-  if (/college|school|fee|fees|tuition|course|book|exam|university|class|education|training|coaching/i.test(text)) {
-    return 'Education';
-  }
-  if (/medic|doctor|hospital|clinic|pharmacy|pill|health|dental|dentist|lab|test|checkup/i.test(text)) {
-    return 'Healthcare';
-  }
-  if (/movie|cinema|film|theatre|netflix|prime|hotstar|spotify|concert|show|event|party|club|game|gaming|steam/i.test(text)) {
-    return 'Entertainment';
-  }
-  if (/trip|tour|vacation|flight|hotel|resort|airbnb|travel|sightseeing/i.test(text)) {
-    return 'Travel';
-  }
-  if (/salon|haircut|spa|massage|gym|fitness|yoga|grooming|cosmetic|makeup/i.test(text)) {
-    return 'Personal Care';
+  if (description) {
+    for (let i = 0; i < CATEGORY_RULES.length; i++) {
+      if (CATEGORY_RULES[i][1].test(description)) {
+        return CATEGORY_RULES[i][0];
+      }
+    }
   }
 
   return 'Other';
@@ -324,6 +319,10 @@ app.post("/api/chat", async (req, res) => {
     }
 
     const ai = getGeminiClient();
+    if (!ai) {
+      const fallback = fallbackRuleBasedExtractor(message, financialState);
+      return res.json(fallback);
+    }
 
     // Prepare deterministic context from application engine state
     const summary = financialState.summary || {};

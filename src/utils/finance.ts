@@ -43,6 +43,20 @@ export const VALID_CATEGORIES: ExpenseCategory[] = [
   'Other',
 ];
 
+// Pre-compiled category keyword detection rules
+const CATEGORY_RULES: [ExpenseCategory, RegExp][] = [
+  ['Food & Dining', /food|dine|dining|restaurant|cafe|coffee|tea|biscuit|snack|grocer|meal|swiggy|zomato|burger|pizza|bread|milk|lunch|dinner|breakfast|fruit|vegetable|drink/i],
+  ['Utilities & Bills', /utilit|bill|bills|electric|power|water|gas|wifi|internet|broadband|recharge|mobile bill|phone bill|maintenance|maid|cook|clean/i],
+  ['Shopping & Gadgets', /shop|shopping|gadget|phone|mobile|laptop|macbook|computer|ipad|tablet|headphone|airpod|electronic|cloth|shirt|pant|shoe|watch|amazon|flipkart|myntra|zara|apparel|dress/i],
+  ['Housing & Rent', /rent|housing|house|flat|apartment|pg|deposit|mortgage|lease|room|hostel/i],
+  ['Transport & Fuel', /transport|fuel|petrol|diesel|gasoline|travel|uber|ola|cab|auto|metro|bus|train|railway|fare|toll|flight|parking/i],
+  ['Education', /educat|college|school|tuition|fee|fees|course|book|books|university|exam|class|training|coaching/i],
+  ['Healthcare', /health|medic|doctor|hospital|clinic|pharmacy|dental|dentist|pill|lab|test|checkup/i],
+  ['Entertainment', /entertain|movie|cinema|film|theatre|netflix|spotify|party|game|gaming|club|steam|hotstar|prime|concert|show|event/i],
+  ['Travel', /travel|trip|tour|vacation|flight|hotel|resort|airbnb|sightseeing/i],
+  ['Personal Care', /personal|care|salon|haircut|spa|massage|gym|fitness|yoga|grooming|cosmetic|makeup/i],
+];
+
 /**
  * Normalizes any free-form string or category suggestion into one of the 11 standard ExpenseCategory types
  */
@@ -52,76 +66,30 @@ export function normalizeCategory(categoryStr?: string, description?: string): E
     const exact = VALID_CATEGORIES.find((c) => c.toLowerCase() === trimmed.toLowerCase());
     if (exact) return exact;
 
-    const lower = trimmed.toLowerCase();
-    if (/food|dine|dining|restaurant|cafe|coffee|tea|biscuit|snack|grocer|meal|swiggy|zomato/i.test(lower)) {
-      return 'Food & Dining';
-    }
-    if (/utilit|bill|electric|power|water|gas|wifi|internet|broadband|recharge|mobile bill|phone bill|maintenance/i.test(lower)) {
-      return 'Utilities & Bills';
-    }
-    if (/shop|gadget|phone|mobile|laptop|computer|electronics|clothes|apparel|shoes|macbook/i.test(lower)) {
-      return 'Shopping & Gadgets';
-    }
-    if (/rent|housing|house|flat|apartment|pg|deposit|mortgage/i.test(lower)) {
-      return 'Housing & Rent';
-    }
-    if (/transport|fuel|petrol|diesel|travel|uber|ola|cab|auto|metro|bus|train|fare|toll/i.test(lower)) {
-      return 'Transport & Fuel';
-    }
-    if (/educat|college|school|tuition|fee|fees|course|books|university/i.test(lower)) {
-      return 'Education';
-    }
-    if (/health|medic|doctor|hospital|clinic|pharmacy|dental/i.test(lower)) {
-      return 'Healthcare';
-    }
-    if (/entertain|movie|cinema|netflix|spotify|party|game|gaming|club/i.test(lower)) {
-      return 'Entertainment';
-    }
-    if (/travel|trip|tour|flight|hotel|resort|vacation/i.test(lower)) {
-      return 'Travel';
-    }
-    if (/personal|care|salon|haircut|spa|gym|fitness|cosmetic/i.test(lower)) {
-      return 'Personal Care';
+    for (let i = 0; i < CATEGORY_RULES.length; i++) {
+      if (CATEGORY_RULES[i][1].test(trimmed)) {
+        return CATEGORY_RULES[i][0];
+      }
     }
   }
 
-  // Fallback to inspecting description
   if (description) {
-    const lowerDesc = description.toLowerCase();
-    if (/food|dine|dining|restaurant|cafe|coffee|tea|snack|biscuit|lunch|dinner|breakfast|meal|pizza|burger|grocer|swiggy|zomato|vegetable|fruit|milk|bread|cake|drink/i.test(lowerDesc)) {
-      return 'Food & Dining';
-    }
-    if (/electric|power|water|gas|wifi|internet|broadband|recharge|phone bill|mobile bill|utility|utilities|bill|bills|maid|cook|maintenance|clean/i.test(lowerDesc)) {
-      return 'Utilities & Bills';
-    }
-    if (/phone|mobile|laptop|macbook|computer|ipad|tablet|headphone|airpod|gadget|electronic|cloth|shirt|pant|shoe|watch|shopping|amazon|flipkart|myntra|zara|apparel|dress/i.test(lowerDesc)) {
-      return 'Shopping & Gadgets';
-    }
-    if (/rent|lease|mortgage|flat|apartment|house|room|hostel|pg|deposit/i.test(lowerDesc)) {
-      return 'Housing & Rent';
-    }
-    if (/fuel|petrol|diesel|gasoline|uber|ola|auto|cab|taxi|metro|bus|train|railway|fare|toll|flight|parking/i.test(lowerDesc)) {
-      return 'Transport & Fuel';
-    }
-    if (/college|school|fee|fees|tuition|course|book|exam|university|class|education|training|coaching/i.test(lowerDesc)) {
-      return 'Education';
-    }
-    if (/medic|doctor|hospital|clinic|pharmacy|pill|health|dental|dentist|lab|test|checkup/i.test(lowerDesc)) {
-      return 'Healthcare';
-    }
-    if (/movie|cinema|film|theatre|netflix|prime|hotstar|spotify|concert|show|event|party|club|game|gaming|steam/i.test(lowerDesc)) {
-      return 'Entertainment';
-    }
-    if (/trip|tour|vacation|flight|hotel|resort|airbnb|travel|sightseeing/i.test(lowerDesc)) {
-      return 'Travel';
-    }
-    if (/salon|haircut|spa|massage|gym|fitness|yoga|grooming|cosmetic|makeup/i.test(lowerDesc)) {
-      return 'Personal Care';
+    for (let i = 0; i < CATEGORY_RULES.length; i++) {
+      if (CATEGORY_RULES[i][1].test(description)) {
+        return CATEGORY_RULES[i][0];
+      }
     }
   }
 
   return 'Other';
 }
+
+// Cached single instance of Intl.NumberFormat to avoid heavy instantiation per render
+const inrFormatter = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
+  maximumFractionDigits: 0,
+});
 
 /**
  * Standard Indian Rupee (INR) currency formatter
@@ -132,68 +100,59 @@ export function formatINR(amount: number): string {
     return '₹0';
   }
   const isNegative = amount < 0;
-  const absAmount = Math.abs(Math.round(amount));
-
-  const formatted = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(absAmount);
-
+  const formatted = inrFormatter.format(Math.abs(Math.round(amount)));
   return isNegative ? `-${formatted}` : formatted;
 }
 
 /**
- * Computes exact deterministic financial summary
+ * Computes exact deterministic financial summary in single passes
  */
 export function calculateFinancialSummary(
   incomes: IncomeRecord[],
   expenses: ExpenseRecord[],
   futureExpenses: FutureExpenseRecord[]
 ): FinancialSummary {
-  // Sum monthly recurring income
-  const monthlyRecurringIncome = incomes
-    .filter(inc => inc.frequency === 'monthly')
-    .reduce((acc, inc) => acc + (Number(inc.amount) || 0), 0);
+  let monthlyRecurringIncome = 0;
+  let totalOneTimeIncome = 0;
 
-  // Sum one-time income records
-  const totalOneTimeIncome = incomes
-    .filter(inc => inc.frequency !== 'monthly')
-    .reduce((acc, inc) => acc + (Number(inc.amount) || 0), 0);
+  for (let i = 0; i < incomes.length; i++) {
+    const inc = incomes[i];
+    const amt = Number(inc.amount) || 0;
+    if (inc.frequency === 'monthly') {
+      monthlyRecurringIncome += amt;
+    } else {
+      totalOneTimeIncome += amt;
+    }
+  }
 
-  // Effective income for current cycle: one-time + monthly recurring
   const effectiveIncome = totalOneTimeIncome + monthlyRecurringIncome;
-  const totalIncomeRecorded = totalOneTimeIncome + monthlyRecurringIncome;
+  const totalIncomeRecorded = effectiveIncome;
 
-  // Sum past and recorded expenses
-  const totalSpendingRecorded = expenses.reduce(
-    (acc, exp) => acc + (Number(exp.amount) || 0),
-    0
-  );
-
-  // Sum upcoming commitments
-  const totalUpcomingLiabilities = futureExpenses.reduce(
-    (acc, fut) => acc + (Number(fut.amount) || 0),
-    0
-  );
-
-  // Recorded balance = effective income - total spending
-  const recordedBalance = effectiveIncome - totalSpendingRecorded;
-
-  // Net buffer after fulfilling upcoming commitments
-  const netBufferAfterUpcoming = recordedBalance - totalUpcomingLiabilities;
-
-  // Calculate categorical breakdown
+  let totalSpendingRecorded = 0;
   const categoryMap = new Map<ExpenseCategory, { total: number; count: number }>();
 
-  for (const exp of expenses) {
+  for (let i = 0; i < expenses.length; i++) {
+    const exp = expenses[i];
+    const amt = Number(exp.amount) || 0;
+    totalSpendingRecorded += amt;
+
     const cat = exp.category || 'Other';
-    const curr = categoryMap.get(cat) || { total: 0, count: 0 };
-    categoryMap.set(cat, {
-      total: curr.total + (Number(exp.amount) || 0),
-      count: curr.count + 1,
-    });
+    const curr = categoryMap.get(cat);
+    if (curr) {
+      curr.total += amt;
+      curr.count += 1;
+    } else {
+      categoryMap.set(cat, { total: amt, count: 1 });
+    }
   }
+
+  let totalUpcomingLiabilities = 0;
+  for (let i = 0; i < futureExpenses.length; i++) {
+    totalUpcomingLiabilities += Number(futureExpenses[i].amount) || 0;
+  }
+
+  const recordedBalance = effectiveIncome - totalSpendingRecorded;
+  const netBufferAfterUpcoming = recordedBalance - totalUpcomingLiabilities;
 
   const categoryBreakdown: CategoryBreakdown[] = Array.from(categoryMap.entries())
     .map(([category, data]) => ({

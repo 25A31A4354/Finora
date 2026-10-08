@@ -25,6 +25,11 @@ const STORAGE_KEYS = {
   MESSAGES: 'finora_messages_v1',
 };
 
+const AFFORD_REGEX = /(?:can i afford|should i buy|can we afford|is it safe to buy)\s*(?:a|an)?\s*₹?\s*([\d,]+)?\s*([^?]+)?/i;
+const WAIT_REGEX = /what happens if i wait\s*(\d+)?\s*month/i;
+const FALLBACK_AMOUNT_REGEX = /₹?\s*([\d,]+)/;
+const STRIP_AMOUNT_REGEX = /₹?\s*[\d,]+/g;
+
 export default function App() {
   // 1. Session Financial State initialized strictly from sessionStorage or empty
   const [incomes, setIncomes] = useState<IncomeRecord[]>(() => {
@@ -68,38 +73,17 @@ export default function App() {
   // Track last queried item/amount for conversational follow-ups like "What happens if I wait 2 months?"
   const [lastTargetQuery, setLastTargetQuery] = useState<{ amount: number; item: string } | null>(null);
 
-  // Sync to sessionStorage
+  // Consolidated sync to sessionStorage
   useEffect(() => {
     try {
       sessionStorage.setItem(STORAGE_KEYS.INCOMES, JSON.stringify(incomes));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [incomes]);
-
-  useEffect(() => {
-    try {
       sessionStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(expenses));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [expenses]);
-
-  useEffect(() => {
-    try {
       sessionStorage.setItem(STORAGE_KEYS.FUTURE, JSON.stringify(futureExpenses));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [futureExpenses]);
-
-  useEffect(() => {
-    try {
       sessionStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(messages));
     } catch (e) {
-      console.error(e);
+      console.error('Failed to sync financial session:', e);
     }
-  }, [messages]);
+  }, [incomes, expenses, futureExpenses, messages]);
 
   // Compute deterministic summary strictly from recorded live state
   const summary = useMemo(() => {
@@ -258,13 +242,13 @@ export default function App() {
       const lowerText = text.toLowerCase();
       let localCalcDetail: CalculationDetail | undefined = undefined;
 
-      const affordMatch = lowerText.match(/(?:can i afford|should i buy|can we afford|is it safe to buy)\s*(?:a|an)?\s*₹?\s*([\d,]+)?\s*([^?]+)?/i);
-      const waitMatch = lowerText.match(/what happens if i wait\s*(\d+)?\s*month/i);
+      const affordMatch = lowerText.match(AFFORD_REGEX);
+      const waitMatch = lowerText.match(WAIT_REGEX);
 
       if (affordMatch) {
-        const rawAmt = affordMatch[1] || (lowerText.match(/₹?\s*([\d,]+)/)?.[1] || '0');
+        const rawAmt = affordMatch[1] || (lowerText.match(FALLBACK_AMOUNT_REGEX)?.[1] || '0');
         const targetAmt = parseInt(rawAmt.replace(/,/g, ''), 10);
-        const item = (affordMatch[2] || 'item').replace(/₹?\s*[\d,]+/g, '').trim() || 'item';
+        const item = (affordMatch[2] || 'item').replace(STRIP_AMOUNT_REGEX, '').trim() || 'item';
         if (targetAmt > 0) {
           setLastTargetQuery({ amount: targetAmt, item });
           localCalcDetail = simulateAffordability(targetAmt, item, 0, summary);
@@ -417,26 +401,39 @@ export default function App() {
   const hasData = incomes.length > 0 || expenses.length > 0 || futureExpenses.length > 0;
 
   return (
-    <div className="min-h-screen bg-[#090D11] text-[#E6EDF3] flex flex-col selection:bg-teal-500/30 selection:text-teal-200">
+    <div className="min-h-screen bg-[#F8F9F8] text-[#121614] flex flex-col selection:bg-emerald-100 selection:text-[#059669] relative">
+      {/* Ambient Apple Glow in background */}
+      <div 
+        className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] pointer-events-none opacity-40 blur-[100px] -z-10"
+        style={{
+          background: 'radial-gradient(ellipse at top, rgba(16,185,129,0.08) 0%, rgba(255,255,255,0) 70%)'
+        }}
+      />
+
       {/* Global Header */}
       <Header
         onReset={handleReset}
         hasData={hasData}
+        onOpenAddRecord={() => setIsModalOpen(true)}
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        {/* Top Section: Financial Snapshot Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-9 space-y-7 sm:space-y-9">
+        {/* Section Header: Capital Snapshot Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-black/[0.05]">
           <div>
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              Financial Snapshot
-              <span className="text-[10px] font-normal text-slate-400 capitalize px-2 py-0.5 rounded bg-[#141C26] border border-[#222E3E]">
-                Live Session
+            <div className="flex items-center gap-2.5 mb-1">
+              <span className="w-2 h-2 rounded-full bg-[#059669]" />
+              <h2 className="text-xs font-semibold text-[#121614] uppercase tracking-wider">
+                Capital Runway & Position
+              </h2>
+              <span className="text-black/20 text-xs" aria-hidden="true">·</span>
+              <span className="text-[11px] font-mono-num text-[#5E6662]">
+                Deterministic Synthesis
               </span>
-            </h2>
-            <p className="text-xs text-slate-400">
-              Computed deterministically from your recorded past, current, and future commitments.
+            </div>
+            <p className="text-xs text-[#5E6662] max-w-2xl leading-relaxed font-normal">
+              Continuous evaluation of recorded cash flow, scheduled obligations, and forward liquidity capacity.
             </p>
           </div>
 
@@ -444,19 +441,19 @@ export default function App() {
             <button
               id="btn-open-manual-entry"
               onClick={() => setIsModalOpen(true)}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-950 hover:bg-teal-900 text-teal-300 border border-teal-700/50 flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="apple-press text-xs font-medium px-4 py-2 rounded-full bg-white hover:bg-[#F8F9F8] text-[#121614] border border-black/[0.07] flex items-center gap-2 transition-all cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Record</span>
+              <Plus className="w-3.5 h-3.5 text-[#059669]" />
+              <span>Direct Entry</span>
             </button>
           </div>
         </div>
 
-        {/* Snapshot Metric Cards */}
+        {/* Snapshot Metric Statement */}
         <FinancialSnapshot summary={summary} />
 
         {/* Core Layout: Central Chat (60%) + Analytics/Activity Sidebar (40%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 sm:gap-9 items-start">
           {/* Chat Interface (Main Stage) */}
           <div className="lg:col-span-7 xl:col-span-7">
             <ChatInterface
@@ -467,14 +464,14 @@ export default function App() {
           </div>
 
           {/* Right Column: Breakdown & Activity Log */}
-          <div className="lg:col-span-5 xl:col-span-5 space-y-4">
-            {/* Categorical Breakdown Card */}
+          <div className="lg:col-span-5 xl:col-span-5 space-y-7">
+            {/* Categorical Breakdown */}
             <CategoricalBreakdown
               breakdown={summary.categoryBreakdown}
               totalSpending={summary.totalSpendingRecorded}
             />
 
-            {/* Recent Financial Activity Card */}
+            {/* Recent Financial Activity Ledger */}
             <RecentActivity
               incomes={incomes}
               expenses={expenses}
@@ -486,6 +483,22 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      {/* Apple-grade Minimalist Footer */}
+      <footer className="border-t border-black/[0.05] py-6 mt-12 bg-white/50 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#8D9691] font-mono-num">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-[#121614]">Finora Platform</span>
+            <span>·</span>
+            <span>Apple Card Inspired Architecture</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span>Deterministic Math Verified</span>
+            <span>·</span>
+            <span>Private Session-Isolated Storage</span>
+          </div>
+        </div>
+      </footer>
 
       {/* Manual Entry Modal */}
       <ManualEntryModal

@@ -4,16 +4,15 @@ import { formatINR } from '../utils/finance';
 import {
   Send,
   Sparkles,
-  Bot,
-  User,
   ArrowUpRight,
   ArrowDownRight,
   CalendarClock,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
   Clock,
-  Calculator
+  ShieldCheck,
+  AlertTriangle,
+  AlertOctagon,
+  ArrowRight,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface ChatInterfaceProps {
@@ -62,62 +61,55 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div
       id="chat-interface"
-      className="bg-[#0B1017] border border-[#1C2634] rounded-xl flex flex-col h-[560px] sm:h-[620px] shadow-sm overflow-hidden"
+      className="apple-glass-card rounded-[28px] flex flex-col h-[650px] sm:h-[720px] overflow-hidden relative"
     >
-      {/* Chat Header */}
-      <div className="px-4 py-3 border-b border-[#1A2330] bg-[#0E151F] flex items-center justify-between">
+      {/* Apple Intelligence Style Titlebar */}
+      <div className="px-6 py-4 border-b border-black/[0.05] bg-white/70 backdrop-blur-md flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-teal-950/80 border border-teal-500/40 flex items-center justify-center text-teal-300">
-            <Bot className="w-4 h-4" />
-          </div>
-          <div>
-            <h2 className="text-xs font-bold text-white tracking-wide uppercase flex items-center gap-2">
-              Finora Decision Chat
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-            </h2>
-            <p className="text-[10px] text-slate-400">
-              Natural conversation & memory extraction
-            </p>
-          </div>
+          <div className="w-2 h-2 rounded-full bg-[#059669] shadow-[0_0_8px_rgba(5,150,105,0.6)] animate-pulse" />
+          <h2 className="text-xs font-semibold text-[#121614] uppercase tracking-wider">
+            Conversational Intelligence & Decision Core
+          </h2>
         </div>
 
-        <div className="text-[11px] text-slate-400 flex items-center gap-1 bg-[#141C26] px-2 py-0.5 rounded border border-[#232F40]">
-          <Clock className="w-3 h-3 text-teal-400" />
+        <div className="text-[11px] font-mono-num text-[#8D9691] flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/[0.03]">
+          <Clock className="w-3 h-3 text-[#5E6662]" />
           <span>Active Session</span>
         </div>
       </div>
 
-      {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Conversation Stream */}
+      <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4 py-8">
-            <div className="w-12 h-12 rounded-xl bg-teal-950/40 border border-teal-500/30 flex items-center justify-center text-teal-300 mb-3 shadow-[0_0_20px_rgba(20,184,166,0.1)]">
-              <Sparkles className="w-6 h-6 text-teal-400" />
+            <div className="w-13 h-13 rounded-2xl bg-gradient-to-b from-white to-[#F2F4F2] text-[#059669] flex items-center justify-center mb-4 shadow-[0_4px_16px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,1)] border border-black/[0.05]">
+              <Sparkles className="w-6 h-6 text-[#059669]" />
             </div>
-            <h3 className="text-sm font-bold text-white mb-1">
-              Talk to Finora
+            
+            <h3 className="text-2xl font-semibold text-[#121614] mb-2 tracking-tight">
+              Finora Capital Intelligence
             </h3>
-            <p className="text-xs text-slate-400 max-w-md mb-5 leading-relaxed">
-              Tell me about your income, past spending, or future commitments. I maintain your structured financial snapshot and help you test future purchasing decisions.
+            
+            <p className="text-xs sm:text-sm text-[#5E6662] max-w-md mb-8 leading-relaxed font-normal">
+              Speak naturally about your income, daily spend, or future commitments. Finora builds your financial memory and stress-tests decisions with deterministic precision.
             </p>
 
-            {/* Quick Sample Prompts Grid */}
-            <div className="w-full max-w-md">
-              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 text-left">
-                Suggested questions to try:
+            {/* Apple Style Suggested Queries */}
+            <div className="w-full max-w-lg">
+              <div className="text-[11px] font-semibold text-[#8D9691] uppercase tracking-wider mb-2.5 text-left flex items-center justify-between">
+                <span>Suggested inquiries</span>
+                <span className="text-[10px] font-mono-num text-[#8D9691]">Tap to simulate</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {SAMPLE_PROMPTS.map((prompt, idx) => (
                   <button
                     key={idx}
                     id={`btn-sample-prompt-${idx}`}
                     onClick={() => handlePromptClick(prompt)}
-                    className="text-left text-xs p-2.5 rounded-lg bg-[#111822] hover:bg-[#16202D] text-slate-300 hover:text-white border border-[#202C3C] hover:border-teal-500/40 transition-all flex items-start gap-2 cursor-pointer group"
+                    className="apple-press apple-hint-parent text-left text-xs p-3.5 rounded-2xl bg-white hover:bg-[#F8F9F8] text-[#5E6662] hover:text-[#121614] border border-black/[0.06] hover:border-black/[0.12] transition-all flex items-start justify-between gap-2.5 cursor-pointer group shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
                   >
-                    <span className="text-teal-400 group-hover:translate-x-0.5 transition-transform text-xs shrink-0 mt-0.5">
-                      ›
-                    </span>
-                    <span className="leading-snug">{prompt}</span>
+                    <span className="leading-snug font-medium">{prompt}</span>
+                    <ArrowRight className="apple-hint-child w-3.5 h-3.5 text-[#8D9691] group-hover:text-[#059669] shrink-0 mt-0.5" />
                   </button>
                 ))}
               </div>
@@ -127,196 +119,257 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex flex-col ${
+              className={`flex flex-col animate-[appleSheetEnter_0.35s_var(--spring-smooth)] ${
                 msg.sender === 'user' ? 'items-end' : 'items-start'
               }`}
             >
               <div
-                className={`flex gap-2.5 max-w-[90%] sm:max-w-[80%] ${
-                  msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
+                className={`flex flex-col max-w-[94%] sm:max-w-[88%] space-y-2 ${
+                  msg.sender === 'user' ? 'items-end' : 'items-start'
                 }`}
               >
-                {/* Avatar */}
-                <div
-                  className={`w-7 h-7 rounded-md shrink-0 flex items-center justify-center text-xs ${
-                    msg.sender === 'user'
-                      ? 'bg-[#1E293B] text-slate-300 border border-slate-700'
-                      : 'bg-teal-950 text-teal-300 border border-teal-600/50'
-                  }`}
-                >
+                {/* Sender badge */}
+                <div className="flex items-center gap-1.5 px-1">
                   {msg.sender === 'user' ? (
-                    <User className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-mono-num font-semibold text-[#8D9691] uppercase tracking-wider">
+                      You
+                    </span>
                   ) : (
-                    <Bot className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#059669]" />
+                      <span className="text-[10px] font-mono-num font-bold text-[#059669] uppercase tracking-wider">
+                        Finora
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                {/* Content Bubble */}
-                <div className="space-y-2">
-                  <div
-                    className={`rounded-xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed ${
-                      msg.sender === 'user'
-                        ? 'bg-teal-950/80 text-teal-100 border border-teal-600/40 shadow-xs'
-                        : 'bg-[#121A24] text-slate-200 border border-[#212D3D]'
-                    }`}
-                  >
-                    <div className="whitespace-pre-wrap">{msg.text}</div>
-                  </div>
+                {/* Message Body */}
+                <div
+                  className={`rounded-2xl px-4.5 py-3 text-xs sm:text-sm leading-relaxed ${
+                    msg.sender === 'user'
+                      ? 'bg-[#121614] text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-tr-xs'
+                      : 'bg-white/80 border border-black/[0.05] shadow-[0_2px_12px_rgba(0,0,0,0.03)] rounded-tl-xs text-[#121614]'
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap font-normal">{msg.text}</div>
+                </div>
 
-                  {/* Extracted Record Badges */}
-                  {msg.extractedActions && msg.extractedActions.length > 0 && (
-                    <div className="space-y-1.5 pt-1">
-                      {msg.extractedActions.map((action, idx) => (
-                        <div
-                          key={idx}
-                          className="bg-[#0C141C] border border-teal-500/30 rounded-lg p-2 text-xs flex items-center justify-between gap-3 shadow-xs"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="w-5 h-5 rounded flex items-center justify-center bg-teal-950 text-teal-300 border border-teal-700/40 shrink-0">
-                              {action.type === 'add_income' && (
-                                <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
-                              )}
-                              {action.type === 'add_expense' && (
-                                <ArrowDownRight className="w-3.5 h-3.5 text-slate-300" />
-                              )}
-                              {action.type === 'add_future_expense' && (
-                                <CalendarClock className="w-3.5 h-3.5 text-cyan-400" />
-                              )}
-                            </span>
-                            <div className="min-w-0">
-                              <span className="font-semibold text-white">
+                {/* Apple Wallet Transaction Confirmation Slips */}
+                {msg.extractedActions && msg.extractedActions.length > 0 && (
+                  <div className="w-full space-y-2 pt-1">
+                    {msg.extractedActions.map((action, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white border border-black/[0.06] rounded-xl p-3.5 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.03)]"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border ${
+                            action.type === 'add_income'
+                              ? 'bg-emerald-50 text-[#059669] border-emerald-100'
+                              : action.type === 'add_expense'
+                              ? 'bg-black/[0.03] text-[#121614] border-black/[0.05]'
+                              : 'bg-amber-50 text-amber-700 border-amber-100'
+                          }`}>
+                            {action.type === 'add_income' && (
+                              <ArrowUpRight className="w-4 h-4 text-[#059669]" />
+                            )}
+                            {action.type === 'add_expense' && (
+                              <ArrowDownRight className="w-4 h-4 text-[#121614]" />
+                            )}
+                            {action.type === 'add_future_expense' && (
+                              <CalendarClock className="w-4 h-4 text-amber-700" />
+                            )}
+                          </span>
+                          
+                          <div className="min-w-0 text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono-num text-[10px] font-semibold text-[#5E6662] uppercase tracking-wider">
                                 {action.type === 'add_income'
-                                  ? 'Recorded Income'
+                                  ? 'Inflow Logged'
                                   : action.type === 'add_expense'
-                                  ? 'Recorded Expense'
-                                  : 'Upcoming Commitment'}
-                                :{' '}
-                              </span>
-                              <span className="text-slate-300">
-                                {action.sourceOrDescription}
+                                  ? 'Outflow Registered'
+                                  : 'Liabilities Scheduled'}
                               </span>
                               {action.category && (
-                                <span className="text-[10px] text-teal-400 bg-teal-950/60 px-1.5 py-0.5 rounded ml-1.5 border border-teal-800/40">
-                                  {action.category}
-                                </span>
+                                <>
+                                  <span className="text-black/20" aria-hidden="true">·</span>
+                                  <span className="text-[11px] text-[#5E6662]">
+                                    {action.category}
+                                  </span>
+                                </>
                               )}
                             </div>
+                            <div className="text-[#121614] font-medium truncate mt-0.5">
+                              {action.sourceOrDescription}
+                            </div>
                           </div>
+                        </div>
 
-                          <div className="font-mono-num font-bold text-teal-300 text-xs shrink-0">
+                        <div className="font-mono-num font-semibold text-sm shrink-0 flex items-center gap-1 self-end sm:self-center">
+                          <span className={action.type === 'add_income' ? 'text-[#059669]' : 'text-[#121614]'}>
+                            {action.type === 'add_income' ? '+' : action.type === 'add_expense' ? '−' : '⌛ '}
                             {formatINR(action.amount)}
-                            {action.dateOrFrequency === 'monthly' && (
-                              <span className="text-[10px] text-slate-400 font-normal">
-                                /mo
-                              </span>
-                            )}
-                          </div>
+                          </span>
+                          {action.dateOrFrequency === 'monthly' && (
+                            <span className="text-[11px] text-[#8D9691] font-normal">
+                              /mo
+                            </span>
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-                  {/* Calculation Details Card (if affordability or wait query was answered) */}
-                  {msg.calculationDetails && (
-                    <div className="bg-[#0D151E] border border-[#212E3F] rounded-lg p-3 text-xs space-y-2">
-                      <div className="flex items-center justify-between border-b border-[#1A2534] pb-1.5">
-                        <span className="font-semibold text-slate-200 flex items-center gap-1.5">
-                          <Calculator className="w-3.5 h-3.5 text-teal-400" />
-                          Deterministic Calculation Breakdown
+                {/* Apple Card Style Decision Simulator Pass */}
+                {msg.calculationDetails && (
+                  <div className="w-full bg-white border border-black/[0.06] rounded-2xl p-4 sm:p-5 text-xs space-y-4 mt-2 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+                    {/* Header & Verdict */}
+                    <div className="flex items-center justify-between border-b border-black/[0.05] pb-3">
+                      <div>
+                        <span className="text-[11px] font-semibold text-[#5E6662] uppercase tracking-wider block">
+                          Purchasing Decision Assessment
                         </span>
-                        {msg.calculationDetails.verdict && (
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
-                              msg.calculationDetails.verdict === 'AFFORDABLE'
-                                ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                                : msg.calculationDetails.verdict === 'TIGHT'
-                                ? 'bg-amber-950 text-amber-300 border border-amber-800'
-                                : 'bg-rose-950 text-rose-300 border border-rose-800'
-                            }`}
-                          >
-                            {msg.calculationDetails.verdict.replace('_', ' ')}
-                          </span>
-                        )}
+                        <span className="text-[10px] text-[#8D9691] font-mono-num">
+                          Deterministic Capital Evaluation
+                        </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-[11px] font-mono-num">
-                        <div className="text-slate-400">
-                          Current Balance:{' '}
-                          <span className="text-white font-semibold">
-                            {formatINR(msg.calculationDetails.currentBalance)}
-                          </span>
-                        </div>
-                        {msg.calculationDetails.targetAmount && (
-                          <div className="text-slate-400">
-                            Target Item:{' '}
-                            <span className="text-white font-semibold">
-                              {formatINR(msg.calculationDetails.targetAmount)}
+                      {msg.calculationDetails.verdict && (
+                        <div className="flex items-center gap-1.5">
+                          {msg.calculationDetails.verdict === 'AFFORDABLE' ? (
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider text-[#059669] bg-emerald-50 border border-emerald-200/60 shadow-xs">
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#059669]" />
+                              Affordable
                             </span>
-                          </div>
-                        )}
-                        <div className="text-slate-400">
-                          Upcoming Commitments:{' '}
-                          <span className="text-cyan-300 font-semibold">
-                            {formatINR(msg.calculationDetails.upcomingDeductions || 0)}
-                          </span>
-                        </div>
-                        {msg.calculationDetails.netBuffer !== undefined && (
-                          <div className="text-slate-400">
-                            Projected Net Buffer:{' '}
-                            <span
-                              className={`font-semibold ${
-                                msg.calculationDetails.netBuffer >= 0
-                                  ? 'text-teal-300'
-                                  : 'text-rose-400'
-                              }`}
-                            >
-                              {formatINR(msg.calculationDetails.netBuffer)}
+                          ) : msg.calculationDetails.verdict === 'TIGHT' ? (
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 shadow-xs">
+                              <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
+                              Tight Reserve
                             </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {msg.calculationDetails.waitMonthsScenario && (
-                        <div className="mt-1.5 p-2 bg-[#121A24] rounded border border-[#1E2938] text-[11px]">
-                          <span className="text-teal-300 font-semibold">
-                            Waiting {msg.calculationDetails.waitMonthsScenario.months} Months:
-                          </span>{' '}
-                          Adds{' '}
-                          <span className="font-mono-num text-emerald-400 font-semibold">
-                            +{formatINR(msg.calculationDetails.waitMonthsScenario.projectedIncomeAdded)}
-                          </span>{' '}
-                          in recurring earnings, resulting in an estimated balance of{' '}
-                          <span className="font-mono-num text-teal-300 font-semibold">
-                            {formatINR(msg.calculationDetails.waitMonthsScenario.projectedBalanceWithPurchase)}
-                          </span>{' '}
-                          after purchase & commitments.
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider text-rose-700 bg-rose-50 border border-rose-200 shadow-xs">
+                              <AlertOctagon className="w-3.5 h-3.5 text-rose-700" />
+                              Unsafe
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
+
+                    {/* Step Breakdown Matrix */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 py-1">
+                      {/* 1. Current Position */}
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-mono-num text-[#8D9691] uppercase tracking-wider">
+                          Current Position
+                        </div>
+                        <div className="text-sm font-semibold font-mono-num text-[#121614]">
+                          {formatINR(msg.calculationDetails.currentBalance)}
+                        </div>
+                      </div>
+
+                      {/* 2. Target Cost */}
+                      {msg.calculationDetails.targetAmount !== undefined && (
+                        <div className="space-y-1">
+                          <div className="text-[10px] font-mono-num text-[#8D9691] uppercase tracking-wider truncate">
+                            Item Outlay
+                          </div>
+                          <div className="text-sm font-semibold font-mono-num text-[#121614]">
+                            − {formatINR(msg.calculationDetails.targetAmount)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 3. Upcoming Obligations */}
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-mono-num text-[#8D9691] uppercase tracking-wider truncate">
+                          Reserved Liabilities
+                        </div>
+                        <div className="text-sm font-semibold font-mono-num text-[#5E6662]">
+                          {formatINR(msg.calculationDetails.upcomingDeductions || 0)}
+                        </div>
+                      </div>
+
+                      {/* 4. Retained Buffer */}
+                      {msg.calculationDetails.netBuffer !== undefined && (
+                        <div className="space-y-1">
+                          <div className="text-[10px] font-mono-num text-[#8D9691] uppercase tracking-wider">
+                            Retained Cushion
+                          </div>
+                          <div
+                            className={`text-sm font-bold font-mono-num ${
+                              msg.calculationDetails.netBuffer >= 0
+                                ? 'text-[#059669]'
+                                : 'text-rose-600'
+                            }`}
+                          >
+                            {formatINR(msg.calculationDetails.netBuffer)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Buy Now vs Wait Scenario Comparison */}
+                    {msg.calculationDetails.waitMonthsScenario && (
+                      <div className="mt-2 p-3.5 bg-black/[0.02] rounded-xl border border-black/[0.05] text-xs space-y-2">
+                        <div className="text-[11px] font-semibold text-[#121614] uppercase tracking-wider">
+                          Scenario Comparison: Buy Now vs. Wait {msg.calculationDetails.waitMonthsScenario.months} Months
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                          <div className="bg-white p-3 rounded-xl border border-black/[0.05] shadow-xs">
+                            <div className="text-[10px] font-mono-num text-[#8D9691] uppercase tracking-wider">
+                              Option A: Transact Now
+                            </div>
+                            <div className="text-xs font-semibold font-mono-num text-[#121614] mt-1">
+                              Post-Purchase Cushion: {formatINR(msg.calculationDetails.netBuffer || 0)}
+                            </div>
+                          </div>
+                          <div className="bg-white p-3 rounded-xl border border-emerald-200/80 shadow-xs">
+                            <div className="text-[10px] font-mono-num text-[#059669] font-semibold uppercase tracking-wider flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-[#059669]" />
+                              Option B: Wait {msg.calculationDetails.waitMonthsScenario.months} Months
+                            </div>
+                            <div className="text-xs font-semibold font-mono-num text-[#121614] mt-1">
+                              Projected Buffer: {formatINR(msg.calculationDetails.waitMonthsScenario.projectedBalanceWithPurchase)}
+                            </div>
+                            <div className="text-[10px] text-[#5E6662] mt-0.5 font-mono-num">
+                              (+{formatINR(msg.calculationDetails.waitMonthsScenario.projectedIncomeAdded)} recurring cash)
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))
         )}
 
-        {/* Loading Indicator */}
+        {/* Loading Pulse */}
         {isLoading && (
-          <div className="flex items-center gap-2.5 text-xs text-slate-400 pl-1">
-            <div className="w-7 h-7 rounded-md bg-teal-950 text-teal-300 border border-teal-600/50 flex items-center justify-center">
-              <Bot className="w-3.5 h-3.5 animate-pulse" />
+          <div className="flex flex-col items-start space-y-1.5 pl-1">
+            <div className="flex items-center gap-1.5 px-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#059669] animate-pulse" />
+              <span className="text-[10px] font-mono-num font-bold text-[#059669] uppercase tracking-wider">
+                Finora
+              </span>
             </div>
-            <div className="bg-[#121A24] border border-[#212D3D] rounded-xl px-3.5 py-2 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-bounce" />
+            <div className="bg-white border border-black/[0.06] rounded-2xl px-4 py-2.5 flex items-center gap-2.5 shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#059669] animate-bounce" />
               <span
-                className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-bounce"
+                className="w-1.5 h-1.5 rounded-full bg-[#059669] animate-bounce"
                 style={{ animationDelay: '150ms' }}
               />
               <span
-                className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-bounce"
+                className="w-1.5 h-1.5 rounded-full bg-[#059669] animate-bounce"
                 style={{ animationDelay: '300ms' }}
               />
-              <span className="text-[11px] text-slate-400 ml-1">Finora is computing...</span>
+              <span className="text-xs font-mono-num text-[#5E6662] ml-1">
+                Synthesizing financial memory & calculations...
+              </span>
             </div>
           </div>
         )}
@@ -324,49 +377,90 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested chips above input if there are already messages */}
+      {/* Suggested Inquiries (When conversation is active) */}
       {messages.length > 0 && (
-        <div className="px-4 py-1.5 bg-[#0D141C] border-t border-[#18212C] flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[11px]">
-          <span className="text-slate-500 text-[10px] uppercase font-semibold shrink-0">
-            Quick Ask:
+        <div className="px-5 py-2.5 bg-white/70 backdrop-blur-md border-t border-black/[0.05] flex items-center gap-2 overflow-x-auto no-scrollbar text-xs">
+          <span className="text-[#8D9691] text-[10px] font-semibold uppercase tracking-wider shrink-0">
+            Suggested →
           </span>
-          {SAMPLE_PROMPTS.slice(3).map((prompt, idx) => (
-            <button
-              key={idx}
-              onClick={() => handlePromptClick(prompt)}
-              className="px-2 py-0.5 rounded bg-[#131B24] hover:bg-[#182330] text-slate-300 hover:text-teal-300 border border-[#202C3B] whitespace-nowrap cursor-pointer transition-colors"
-            >
-              {prompt}
-            </button>
-          ))}
+          <button
+            onClick={() => handlePromptClick("Can I afford a ₹40,000 phone?")}
+            className="apple-press px-3 py-1 rounded-full bg-white hover:bg-[#F8F9F8] text-[#5E6662] hover:text-[#121614] border border-black/[0.06] whitespace-nowrap cursor-pointer transition-colors text-xs font-medium shadow-xs"
+          >
+            Can I afford a ₹40,000 phone?
+          </button>
+          <button
+            onClick={() => handlePromptClick("What happens if I wait 2 months?")}
+            className="apple-press px-3 py-1 rounded-full bg-white hover:bg-[#F8F9F8] text-[#5E6662] hover:text-[#121614] border border-black/[0.06] whitespace-nowrap cursor-pointer transition-colors text-xs font-medium shadow-xs"
+          >
+            What happens if I wait 2 months?
+          </button>
+          <button
+            onClick={() => handlePromptClick("What are my upcoming commitments?")}
+            className="apple-press px-3 py-1 rounded-full bg-white hover:bg-[#F8F9F8] text-[#5E6662] hover:text-[#121614] border border-black/[0.06] whitespace-nowrap cursor-pointer transition-colors text-xs font-medium shadow-xs"
+          >
+            What are my upcoming commitments?
+          </button>
         </div>
       )}
 
-      {/* Input Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="p-3 bg-[#0E151F] border-t border-[#1C2634] flex items-center gap-2"
-      >
-        <input
-          ref={inputRef}
-          id="chat-input-field"
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="E.g. “I earn ₹30,000/mo”, “Spent ₹800 on food”, “Can I afford a ₹40,000 phone?”..."
-          disabled={isLoading}
-          className="flex-1 bg-[#131B24] text-white placeholder-slate-500 text-xs sm:text-sm px-3.5 py-2.5 rounded-lg border border-[#232F3E] focus:outline-none focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/30 transition-all"
-        />
-        <button
-          id="btn-chat-send"
-          type="submit"
-          disabled={!input.trim() || isLoading}
-          className="bg-teal-600 hover:bg-teal-500 disabled:opacity-40 disabled:hover:bg-teal-600 text-black font-semibold p-2.5 sm:px-4 sm:py-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-not-allowed shrink-0"
+      {/* Apple Pill Input Container */}
+      <div className="p-4 sm:p-5 bg-white/90 backdrop-blur-md border-t border-black/[0.05]">
+        <form
+          onSubmit={handleSubmit}
+          className="flex items-center gap-2.5"
         >
-          <span className="hidden sm:inline text-xs font-bold">Send</span>
-          <Send className="w-3.5 h-3.5" />
-        </button>
-      </form>
+          <div className="relative flex-1">
+            <input
+              ref={inputRef}
+              id="chat-input-field"
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Tell Finora about your money (e.g., “Spent ₹450 on food”, “Can I afford a ₹40,000 laptop?”)…"
+              disabled={isLoading}
+              className="w-full bg-[#F2F4F2]/70 text-[#121614] placeholder-[#8D9691] text-xs sm:text-sm px-4.5 py-3 rounded-full border border-black/[0.06] focus:outline-none focus:bg-white focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 transition-all font-sans shadow-xs"
+            />
+          </div>
+          <button
+            id="btn-chat-send"
+            type="submit"
+            disabled={!input.trim() || isLoading}
+            className="apple-press bg-[#121614] hover:bg-[#202723] disabled:opacity-30 disabled:hover:bg-[#121614] text-white font-medium px-4 py-3 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.12)]"
+          >
+            <span className="hidden sm:inline text-xs uppercase tracking-wider font-semibold">Send</span>
+            <Send className="w-3.5 h-3.5 text-white" />
+          </button>
+        </form>
+
+        {/* Micro suggestion pills */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5 px-2 text-[11px] text-[#8D9691]">
+          <span>Quick log:</span>
+          <button
+            type="button"
+            onClick={() => handlePromptClick("Spent ₹500 on food")}
+            className="hover:text-[#059669] transition-colors cursor-pointer"
+          >
+            “Spent ₹500 on food”
+          </button>
+          <span className="text-black/20">·</span>
+          <button
+            type="button"
+            onClick={() => handlePromptClick("Salary ₹30,000 per month")}
+            className="hover:text-[#059669] transition-colors cursor-pointer"
+          >
+            “Salary ₹30,000/mo”
+          </button>
+          <span className="text-black/20">·</span>
+          <button
+            type="button"
+            onClick={() => handlePromptClick("College fees ₹12,000 next month")}
+            className="hover:text-[#059669] transition-colors cursor-pointer"
+          >
+            “College fees ₹12,000 next month”
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ExpenseCategory, IncomeFrequency } from '../types';
-import { X, Plus, ArrowUpRight, ArrowDownRight, CalendarClock } from 'lucide-react';
+import { X, ArrowUpRight, ArrowDownRight, CalendarClock, Plus } from 'lucide-react';
 
 interface ManualEntryModalProps {
   isOpen: boolean;
@@ -38,6 +38,15 @@ export const ManualEntryModal: React.FC<ManualEntryModalProps> = ({
   const [frequency, setFrequency] = useState<IncomeFrequency>('monthly');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
 
+  // Escape key listener for immediate interruptibility and safety
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -59,71 +68,79 @@ export const ManualEntryModal: React.FC<ManualEntryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 backdrop-blur-md apple-backdrop-animate transition-all"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div
         id="modal-manual-entry"
-        className="bg-[#0E151E] border border-[#222E3E] rounded-xl w-full max-w-md p-5 shadow-2xl space-y-4"
+        className="apple-glass-elevated apple-sheet-animate rounded-[28px] w-full max-w-md p-6 sm:p-7 space-y-4 relative"
       >
-        <div className="flex items-center justify-between border-b border-[#1C2634] pb-3">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Plus className="w-4 h-4 text-teal-400" />
-            Add Financial Record Directly
-          </h3>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-black/[0.05] pb-3.5">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-[#059669]" />
+            <h3 className="text-xs font-semibold text-[#121614] uppercase tracking-wider">
+              Direct Record Entry
+            </h3>
+          </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded transition-colors cursor-pointer"
+            className="apple-press text-[#8D9691] hover:text-[#121614] p-1.5 rounded-full hover:bg-black/[0.04] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Type Selector Tabs */}
-        <div className="grid grid-cols-3 gap-1 bg-[#131B24] p-1 rounded-lg border border-[#202C3C]">
+        {/* Apple iOS Segmented Control */}
+        <div className="grid grid-cols-3 gap-1 bg-black/[0.04] p-1 rounded-full border border-black/[0.03]">
           <button
             type="button"
             onClick={() => setEntryType('income')}
-            className={`text-xs font-semibold py-1.5 rounded-md flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`text-xs font-medium py-1.5 rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               entryType === 'income'
-                ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/60 shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-[#059669] font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                : 'text-[#5E6662] hover:text-[#121614]'
             }`}
           >
             <ArrowUpRight className="w-3.5 h-3.5" />
-            Income
+            Inflow
           </button>
           <button
             type="button"
             onClick={() => setEntryType('expense')}
-            className={`text-xs font-semibold py-1.5 rounded-md flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`text-xs font-medium py-1.5 rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               entryType === 'expense'
-                ? 'bg-slate-800 text-slate-200 border border-slate-600 shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-[#121614] font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                : 'text-[#5E6662] hover:text-[#121614]'
             }`}
           >
             <ArrowDownRight className="w-3.5 h-3.5" />
-            Expense
+            Outflow
           </button>
           <button
             type="button"
             onClick={() => setEntryType('future')}
-            className={`text-xs font-semibold py-1.5 rounded-md flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`text-xs font-medium py-1.5 rounded-full flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               entryType === 'future'
-                ? 'bg-cyan-950 text-cyan-300 border border-cyan-700/60 shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-amber-700 font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                : 'text-[#5E6662] hover:text-[#121614]'
             }`}
           >
             <CalendarClock className="w-3.5 h-3.5" />
-            Future
+            Liability
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-1">
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">
+            <label className="block text-[11px] font-semibold text-[#5E6662] uppercase tracking-wider mb-1.5">
               Amount (₹ INR)
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-slate-500 font-mono-num text-xs">₹</span>
+              <span className="absolute left-4 top-3 text-[#8D9691] font-mono-num text-xs">₹</span>
               <input
                 id="input-manual-amount"
                 type="number"
@@ -132,13 +149,13 @@ export const ManualEntryModal: React.FC<ManualEntryModalProps> = ({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="e.g. 30000"
-                className="w-full bg-[#131B24] border border-[#232F40] rounded-lg pl-8 pr-3 py-2 text-white text-xs font-mono-num focus:outline-none focus:border-teal-500/60"
+                className="w-full bg-[#F2F4F2]/70 border border-black/[0.06] rounded-2xl pl-8 pr-4 py-2.5 text-[#121614] text-xs font-mono-num focus:outline-none focus:bg-white focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 transition-all shadow-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">
+            <label className="block text-[11px] font-semibold text-[#5E6662] uppercase tracking-wider mb-1.5">
               {entryType === 'income' ? 'Income Source / Title' : 'Description / Item'}
             </label>
             <input
@@ -149,39 +166,39 @@ export const ManualEntryModal: React.FC<ManualEntryModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               placeholder={
                 entryType === 'income'
-                  ? 'e.g. Monthly Salary, Freelance project'
+                  ? 'e.g. Monthly Salary, Freelance retainer'
                   : entryType === 'expense'
-                  ? 'e.g. Groceries, Phone purchase'
-                  : 'e.g. Laptop replacement, December rent'
+                  ? 'e.g. Dining out, MacBook adapter'
+                  : 'e.g. Term deposit, December tuition'
               }
-              className="w-full bg-[#131B24] border border-[#232F40] rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-teal-500/60"
+              className="w-full bg-[#F2F4F2]/70 border border-black/[0.06] rounded-2xl px-4 py-2.5 text-[#121614] text-xs focus:outline-none focus:bg-white focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 transition-all shadow-xs"
             />
           </div>
 
           {entryType === 'income' ? (
             <div>
-              <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                Frequency
+              <label className="block text-[11px] font-semibold text-[#5E6662] uppercase tracking-wider mb-1.5">
+                Frequency Model
               </label>
               <select
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value as IncomeFrequency)}
-                className="w-full bg-[#131B24] border border-[#232F40] rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-teal-500/60"
+                className="w-full bg-[#F2F4F2]/70 border border-black/[0.06] rounded-2xl px-4 py-2.5 text-[#121614] text-xs focus:outline-none focus:bg-white focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 transition-all shadow-xs"
               >
-                <option value="monthly">Monthly Recurring</option>
-                <option value="one-time">One-Time</option>
-                <option value="yearly">Yearly</option>
+                <option value="monthly">Monthly Recurring (Regular Paycheck)</option>
+                <option value="one-time">One-Time (Bonus, Freelance)</option>
+                <option value="yearly">Yearly (Annual Dividend)</option>
               </select>
             </div>
           ) : (
             <div>
-              <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                Category
+              <label className="block text-[11px] font-semibold text-[#5E6662] uppercase tracking-wider mb-1.5">
+                Expense Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-                className="w-full bg-[#131B24] border border-[#232F40] rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-teal-500/60"
+                className="w-full bg-[#F2F4F2]/70 border border-black/[0.06] rounded-2xl px-4 py-2.5 text-[#121614] text-xs focus:outline-none focus:bg-white focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 transition-all shadow-xs"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -193,33 +210,27 @@ export const ManualEntryModal: React.FC<ManualEntryModalProps> = ({
           )}
 
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">
-              {entryType === 'future' ? 'Target Expected Date / Timeframe' : 'Date'}
+            <label className="block text-[11px] font-semibold text-[#5E6662] uppercase tracking-wider mb-1.5">
+              {entryType === 'future' ? 'Target Scheduled Date' : 'Transaction Date'}
             </label>
             <input
               id="input-manual-date"
               type="text"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              placeholder="e.g. 2026-12-15 or December 2026"
-              className="w-full bg-[#131B24] border border-[#232F40] rounded-lg px-3 py-2 text-white text-xs font-mono-num focus:outline-none focus:border-teal-500/60"
+              placeholder="e.g. 2026-10-02 or December"
+              className="w-full bg-[#F2F4F2]/70 border border-black/[0.06] rounded-2xl px-4 py-2.5 text-[#121614] text-xs font-mono-num focus:outline-none focus:bg-white focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 transition-all shadow-xs"
             />
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#1C2634]">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
+          <div className="pt-2">
             <button
               id="btn-manual-submit"
               type="submit"
-              className="px-4 py-2 rounded-lg text-xs font-bold bg-teal-600 hover:bg-teal-500 text-black transition-colors cursor-pointer"
+              className="apple-press w-full bg-[#121614] hover:bg-[#202723] text-white font-medium py-3 rounded-full text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.12)]"
             >
-              Save Record
+              <Plus className="w-3.5 h-3.5 text-[#34D399]" />
+              <span>Record Financial Item</span>
             </button>
           </div>
         </form>

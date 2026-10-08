@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   IncomeRecord,
   ExpenseRecord,
@@ -6,12 +6,11 @@ import {
 } from '../types';
 import { formatINR } from '../utils/finance';
 import {
-  ArrowDownRight,
-  ArrowUpRight,
-  CalendarClock,
   Trash2,
-  ListFilter,
-  Inbox
+  Inbox,
+  ArrowUpRight,
+  ArrowDownRight,
+  CalendarClock,
 } from 'lucide-react';
 
 interface RecentActivityProps {
@@ -35,17 +34,16 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
 
-  // Unify activity items
-  const allItems = [
+  // Unify and sort activity items only when records change
+  const allItems = useMemo(() => [
     ...incomes.map((i) => ({
       id: i.id,
       type: 'income' as const,
       title: i.source,
       amount: i.amount,
-      tag: i.frequency === 'monthly' ? 'Monthly Income' : 'Income',
+      tag: i.frequency === 'monthly' ? 'Monthly Recurring' : 'Inflow',
       date: i.date,
       createdAt: i.createdAt,
-      onDelete: () => onDeleteIncome(i.id),
     })),
     ...expenses.map((e) => ({
       id: e.id,
@@ -55,59 +53,54 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
       tag: e.category,
       date: e.date,
       createdAt: e.createdAt,
-      onDelete: () => onDeleteExpense(e.id),
     })),
     ...futureExpenses.map((f) => ({
       id: f.id,
       type: 'future' as const,
       title: f.description,
       amount: f.amount,
-      tag: `${f.category} • Due ${f.expectedDate}`,
+      tag: `${f.category} · Due ${f.expectedDate}`,
       date: f.expectedDate,
       createdAt: f.createdAt,
-      onDelete: () => onDeleteFutureExpense(f.id),
     })),
-  ].sort((a, b) => b.createdAt - a.createdAt);
+  ].sort((a, b) => b.createdAt - a.createdAt), [incomes, expenses, futureExpenses]);
 
-  const filteredItems = allItems.filter((item) => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'income') return item.type === 'income';
-    if (activeTab === 'spending') return item.type === 'expense';
-    if (activeTab === 'upcoming') return item.type === 'future';
-    return true;
-  });
+  const filteredItems = useMemo(() => {
+    if (activeTab === 'all') return allItems;
+    if (activeTab === 'income') return allItems.filter((item) => item.type === 'income');
+    if (activeTab === 'spending') return allItems.filter((item) => item.type === 'expense');
+    if (activeTab === 'upcoming') return allItems.filter((item) => item.type === 'future');
+    return allItems;
+  }, [allItems, activeTab]);
 
   return (
     <div
       id="card-recent-activity"
-      className="bg-[#0E151D] border border-[#1E2938] rounded-xl p-4 flex flex-col h-full"
+      className="apple-glass-card rounded-[24px] p-5 sm:p-6 flex flex-col"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
+      {/* Ledger Header & iOS Segmented Control */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 mb-4 pb-3.5 border-b border-black/[0.05]">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-teal-950/60 border border-teal-800/40 flex items-center justify-center text-teal-400">
-            <ListFilter className="w-3.5 h-3.5" />
-          </div>
-          <div>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Financial Memory Log
-            </h3>
-            <p className="text-[10px] text-slate-400">
-              {allItems.length} total records stored in session
-            </p>
-          </div>
+          <h3 className="text-xs font-semibold text-[#121614] uppercase tracking-wider">
+            Ledger & Transactions
+          </h3>
+          <span className="text-black/20 text-xs" aria-hidden="true">·</span>
+          <span className="text-[11px] font-mono-num text-[#5E6662]">
+            {allItems.length} records
+          </span>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1 bg-[#131B24] p-0.5 rounded-lg border border-[#222E3E] self-start sm:self-auto">
+        {/* Apple iOS Segmented Control */}
+        <div className="flex items-center gap-0.5 bg-black/[0.04] p-1 rounded-full border border-black/[0.03] self-start sm:self-auto">
           {(['all', 'income', 'spending', 'upcoming'] as FilterTab[]).map((tab) => (
             <button
               key={tab}
               id={`tab-${tab}`}
               onClick={() => setActiveTab(tab)}
-              className={`text-[11px] font-medium px-2 py-1 rounded-md transition-all cursor-pointer capitalize ${
+              className={`apple-press text-[11px] font-medium px-3 py-1 rounded-full transition-all cursor-pointer capitalize ${
                 activeTab === tab
-                  ? 'bg-teal-950 text-teal-300 border border-teal-700/50 shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white text-[#121614] font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                  : 'text-[#5E6662] hover:text-[#121614]'
               }`}
             >
               {tab}
@@ -116,71 +109,81 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
         </div>
       </div>
 
-      {/* List Container */}
-      <div className="flex-1 overflow-y-auto space-y-2 max-h-[340px] pr-1 min-h-[140px]">
+      {/* Apple Wallet Style Transaction Items */}
+      <div className="flex-1 overflow-y-auto max-h-[380px] divide-y divide-black/[0.03] pr-1">
         {filteredItems.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-500">
-            <div className="w-9 h-9 rounded-full bg-[#16212D] flex items-center justify-center mb-2">
-              <Inbox className="w-4 h-4 text-slate-400" />
+          <div className="h-full flex flex-col items-center justify-center text-center p-8 text-[#8D9691]">
+            <div className="w-11 h-11 rounded-2xl bg-black/[0.03] border border-black/[0.04] flex items-center justify-center mb-3">
+              <Inbox className="w-5 h-5 text-[#8D9691]" />
             </div>
-            <p className="text-xs font-medium text-slate-300">
-              No {activeTab !== 'all' ? activeTab : ''} records yet
+            <p className="text-xs font-medium text-[#121614]">
+              No {activeTab !== 'all' ? activeTab : ''} transactions recorded
             </p>
-            <p className="text-[11px] text-slate-500 max-w-[240px] mt-0.5">
-              Chat naturally to add records (e.g. “I earn ₹30,000/mo”, “Spent ₹800 on food”, or “₹70,000 laptop in Dec”).
+            <p className="text-[11px] text-[#8D9691] max-w-[260px] mt-1 leading-relaxed">
+              New transactions appear here with chronological audit timestamps and instant deletion options.
             </p>
           </div>
         ) : (
           filteredItems.map((item) => (
             <div
               key={`${item.type}-${item.id}`}
-              className="bg-[#121922] hover:bg-[#151F2B] border border-[#1C2634] hover:border-slate-700/60 rounded-lg p-2.5 flex items-center justify-between gap-3 transition-colors group"
+              className="py-3 px-2 hover:bg-black/[0.02] rounded-xl transition-colors flex items-center justify-between gap-4 group"
             >
-              <div className="flex items-center gap-2.5 min-w-0">
+              {/* Left Column: Icon Capsule + Title + Tag */}
+              <div className="flex items-center gap-3.5 min-w-0">
                 <div
-                  className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border ${
                     item.type === 'income'
-                      ? 'bg-emerald-950/70 text-emerald-400 border border-emerald-800/40'
+                      ? 'bg-emerald-50 text-[#059669] border-emerald-100/60'
                       : item.type === 'expense'
-                      ? 'bg-slate-800/70 text-slate-300 border border-slate-700/50'
-                      : 'bg-cyan-950/70 text-cyan-400 border border-cyan-800/40'
+                      ? 'bg-black/[0.03] text-[#121614] border-black/[0.04]'
+                      : 'bg-amber-50 text-amber-700 border-amber-100/60'
                   }`}
                 >
-                  {item.type === 'income' && <ArrowUpRight className="w-4 h-4" />}
-                  {item.type === 'expense' && <ArrowDownRight className="w-4 h-4" />}
-                  {item.type === 'future' && <CalendarClock className="w-4 h-4" />}
+                  {item.type === 'income' ? (
+                    <ArrowUpRight className="w-4 h-4" />
+                  ) : item.type === 'expense' ? (
+                    <ArrowDownRight className="w-4 h-4" />
+                  ) : (
+                    <CalendarClock className="w-4 h-4" />
+                  )}
                 </div>
 
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-slate-200 truncate">
+                  <div className="text-xs font-medium text-[#121614] truncate">
                     {item.title}
                   </div>
-                  <div className="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 truncate">
-                    <span className="truncate">{item.tag}</span>
-                    <span className="text-slate-600">•</span>
+                  <div className="text-[11px] font-mono-num text-[#8D9691] flex items-center gap-1.5 mt-0.5 truncate">
+                    <span className="text-[#5E6662] truncate">{item.tag}</span>
+                    <span aria-hidden="true" className="text-black/20">·</span>
                     <span className="shrink-0">{item.date}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Right Column: Amount + Delete Icon */}
+              <div className="flex items-center gap-3.5 shrink-0">
                 <span
-                  className={`text-xs font-bold font-mono-num ${
+                  className={`text-xs font-semibold font-mono-num ${
                     item.type === 'income'
-                      ? 'text-emerald-400'
+                      ? 'text-[#059669]'
                       : item.type === 'expense'
-                      ? 'text-slate-200'
-                      : 'text-cyan-300'
+                      ? 'text-[#121614]'
+                      : 'text-[#5E6662]'
                   }`}
                 >
-                  {item.type === 'income' ? '+' : item.type === 'expense' ? '-' : '⌛ '}
+                  {item.type === 'income' ? '+' : item.type === 'expense' ? '−' : '⌛ '}
                   {formatINR(item.amount)}
                 </span>
 
                 <button
                   id={`btn-delete-${item.id}`}
-                  onClick={item.onDelete}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 rounded transition-opacity cursor-pointer"
+                  onClick={() => {
+                    if (item.type === 'income') onDeleteIncome(item.id);
+                    else if (item.type === 'expense') onDeleteExpense(item.id);
+                    else onDeleteFutureExpense(item.id);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 p-1.5 text-[#8D9691] hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-all cursor-pointer"
                   title="Remove record"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
