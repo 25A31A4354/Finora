@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 
@@ -310,7 +309,7 @@ function fallbackRuleBasedExtractor(message: string, financialState: any) {
 }
 
 // Chat endpoint
-app.post("/api/chat", async (req, res) => {
+app.post(["/api/chat", "/chat"], async (req, res) => {
   try {
     const { message, conversationHistory = [], financialState = {} } = req.body;
 
@@ -494,13 +493,14 @@ ${financialContext}
 });
 
 // Health check endpoint
-app.get("/api/health", (req, res) => {
+app.get(["/api/health", "/health"], (req, res) => {
   res.json({ status: "ok", app: "Finora", version: "1.0.0" });
 });
 
 // Start server with Vite middleware in dev or static files in prod
 async function start() {
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -519,6 +519,10 @@ async function start() {
   });
 }
 
-start().catch((err) => {
-  console.error("Failed to start server:", err);
-});
+if (!process.env.VERCEL) {
+  start().catch((err) => {
+    console.error("Failed to start server:", err);
+  });
+}
+
+export default app;
